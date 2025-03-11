@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <style>
+      .image-container {
+        overflow: hidden;
+        display: inline-block;
+      }
+
+      .image-container img {
+        width: 100%;
+        transition: transform 0.4s ease-out;
+      }
+    </style>
+
+    <canvas id="curtainCanvas"></canvas>
+
+    <script>
+      const imgSrc =
+        "https://btb2024.wpenginepowered.com/wp-content/uploads/2025/01/AdobeStock_289511278.jpeg"; // Replace with your image
+      const canvas = document.getElementById("curtainCanvas");
+      const ctx = canvas.getContext("2d");
+
+      const img = new Image();
+      img.crossOrigin = "anonymous"; // Fix CORS issues
+      img.src = imgSrc;
+
+      let waveOffset = 0;
+      let targetWaveOffset = 0;
+      let animationFrame;
+
+      img.onload = () => {
+        canvas.width = img.width;
+        canvas.height = img.height;
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      };
+
+      canvas.addEventListener("mousemove", (e) => {
+        const { offsetX } = e;
+        targetWaveOffset = (offsetX / canvas.width) * 10; // Smooth transition target
+        if (!animationFrame) animateCurtainEffect();
+      });
+
+      canvas.addEventListener("mouseleave", () => {
+        targetWaveOffset = 0; // Reset smoothly
+      });
+
+      function animateCurtainEffect() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Smooth interpolation between current and target offset
+        waveOffset += (targetWaveOffset - waveOffset) * 0.1;
+
+        for (let y = 0; y < canvas.height; y += 2) {
+          let wave = Math.sin((y / canvas.height) * 5 + waveOffset) * 15;
+
+          ctx.drawImage(
+            img,
+            0,
+            y,
+            canvas.width,
+            2, // Slice from original image
+            wave,
+            y,
+            canvas.width,
+            2 // Move slice horizontally
+          );
+        }
+
+        if (Math.abs(waveOffset - targetWaveOffset) > 0.01) {
+          animationFrame = requestAnimationFrame(animateCurtainEffect);
+        } else {
+          animationFrame = null; // Stop animation when effect is complete
+        }
+      }
+    </script>
+  </body>
+</html>
